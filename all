@@ -1,0 +1,296 @@
+
+
+%% 1
+%PART A
+x=-10:1:10
+z(x>0)=1;
+subplot(3,1,1)
+stem(x,z)
+title("Unitstep")
+
+p=sign(x);
+subplot(3,1,2);
+stem(x,p)
+title('Signum 102395005')
+
+y(x==0)=1
+y(x~=0)=0;
+subplot(3,1,3);
+stem(x,y);
+title("Impulse");
+% 1 Part B
+dc=input("Enter ");
+f=200;
+fs=2000;
+x=0:1/fs:3/f;
+y=square(2*pi*f*x,dc);
+subplot(2,1,1);
+plot(x,y);
+subplot(2,1,2)
+stem(x,y)
+
+% 1 Part C
+f = 100;
+x = 0:1:f;
+x_stem = 0:1:f;  % Renamed x' to x_stem to avoid confusion
+Amp = 10;
+phase = 1.57;
+y = Amp * sin((f * x) + phase);
+y_stem = Amp * sin((f * x_stem) + phase);  % Renamed y' to y_stem
+
+subplot(2,1,1);
+plot(x, y);
+title('Continuous Signal');
+xlabel('Time');
+ylabel('Amplitude');
+
+subplot(2,1,2);
+stem(x_stem, y_stem);
+title('Discrete Signal');
+xlabel('Time');
+ylabel('Amplitude');
+%% 2 
+clear all
+clc
+
+% Define the range for n
+n = -10:10;
+
+% Define the first signal x[n]
+xn = (n >= 0) - (n >= 6);
+
+% Plot x[n]
+subplot(3,1,1);
+stem(n, xn);
+title('x[n] = u[n] - u[n-6]');
+xlabel('n');
+ylabel('x[n]');
+
+% Define the second signal h[n]
+hn = (n >= 0) - (n >= 3);
+
+% Plot h[n]
+subplot(3,1,2);
+stem(n, hn);
+title('h[n] = u[n] - u[n-3]');
+xlabel('n');
+ylabel('h[n]');
+
+% Perform convolution
+x = length(xn);
+h = length(hn);
+l = x + h - 1;
+xn = [xn zeros(1, l-x)];
+hn = [hn zeros(1, l-h)];
+y = zeros(1, l);
+
+for i = 1:l
+    sum = 0;
+    for j = 1:i
+        sum = sum + (xn(j) * hn(i-j+1));
+    end
+    y(i) = sum;
+end
+
+% Plot the convolution result
+subplot(3,1,3);
+stem(-10:l-11, y);
+title('Convolution y[n] = x[n] * h[n]');
+xlabel('n');
+ylabel('y[n]');
+
+%% 3
+function [DFT, IDFT] = DFT_IDFT(sequence)
+DFT = zeros(size(sequence));
+N = length(sequence);
+for k = 0:N-1
+    for n = 0:N-1
+        DFT(k+1) = DFT(k+1) + sequence(n+1) * exp(-1j * 2 * pi * k * n / N);
+    end
+end
+IDFT = zeros(size(sequence));
+for n = 0:N-1
+    for k = 0:N-1
+        IDFT(n+1) = IDFT(n+1) + DFT(k+1) * exp(1j * 2 * pi * k * n / N);
+    end
+end
+IDFT = IDFT / N;
+end
+N = input('Enter the number of elements in the sequence: ');
+sequence = zeros(1, N);
+for i = 1:N
+    sequence(i) = input(['Enter element ', num2str(i), ': ']);
+end
+
+[DFT, IDFT] = DFT_IDFT(sequence);
+N = length(DFT);
+f = (0:N-1);  
+magnitude = abs(DFT);
+subplot(2,1,1)
+stem(f, magnitude);
+xlabel('Frequency');
+ylabel('Magnitude');
+title('Magnitude Spectrum-(Roll No. 102395005)');
+phase = angle(DFT);
+subplot(2,1,2)
+stem(f, phase);
+xlabel('Frequency');
+ylabel('Phase (radians)');
+title('Phase Spectrum-(Roll No. 102395005)');
+disp('DFT:')
+disp(DFT)
+disp('IDFT:')
+disp(IDFT)
+
+
+
+
+
+
+
+
+
+
+
+%% 4 PART A CICRULAR CONVOLUTION
+x = input('Enter the first sequence x[n]: ');
+h = input('Enter the second sequence h[n]: ');
+N = max(length(x), length(h));
+x = [x, zeros(1, N - length(x))];
+h = [h, zeros(1, N - length(h))];
+y = zeros(1, N);
+for n = 1:N
+    for m = 1:N
+        y(n) = y(n) + x(m) * h(mod(n - m, N) + 1);
+    end
+end
+disp('The Circular Convolution result y[n] without Direct Command is: ');
+disp(y);
+%% 4 PART B Linear Convolution
+% Input sequences
+x = input('Enter the first sequence x[n]: ');
+h = input('Enter the second sequence h[n]: ');
+N = length(x)+length(h)-1;
+x = [x, zeros(1, N - length(x))];
+h = [h, zeros(1, N - length(h))];
+y = zeros(1, N);
+for n = 1:N
+    for m = 1:N
+        y(n) = y(n) + x(m) * h(mod(n - m, N) + 1);
+    end
+end
+disp('The Linear Convolution result y[n] using Circular Convolution is: ');
+disp(y);
+%% 4 PartC
+X = input("Enter First Sequence");
+H = input("Enter Second Sequence");
+N1= length (X);
+N2 = length (H);
+NL = N1+ N2- 1;
+N = max (N1, N2);
+Y=conv (X, H);
+Y1=Y(1:N);
+Y2=[Y(N+1:NL), zeros(1, N- (NL-N))];
+for i =1:N
+    C(i) = Y1(i) + Y2(i);
+end
+disp('Circular Convolution using Linear Convolution');
+disp(C);
+fprintf('Verification :\n')
+%% 4 PART D CIRCULAR CONVOLUTION USING DFT-IDFT METHOD
+x = [1, 2, 3];
+h = [4, 5, 6];
+N = max(length(x), length(h));
+x = [x, zeros(1, N - length(x))];
+h = [h, zeros(1, N - length(h))];
+X = fft(x, N);
+H = fft(h, N);
+Y = X .* H;
+y = ifft(Y, N);
+disp('The circular convolution result using DFT-IDFT is: ');
+disp(real(y)); 
+
+
+
+
+
+
+
+
+
+%%
+% EXP5
+% Parameters
+N = 64; % Window length
+fs = 1000; % Sampling frequency (Hz)
+% Time vector
+t = (-N/2:N/2-1) / fs;
+% Generate windows manually
+rect_win = ones(N, 1);
+hamming_win = zeros(N, 1);
+for n = 0:N-1
+    hamming_win(n+1) = 0.54 - 0.46 * cos(2*pi*n/(N-1));
+end
+hanning_win = zeros(N, 1);
+for n = 0:N-1
+    hanning_win(n+1) = 0.5 * (1 - cos(2*pi*n/(N-1)));
+end
+bartlett_win = zeros(N, 1);
+for n = 0:N-1
+    bartlett_win(n+1) = 1 - abs((n - (N-1)/2) / ((N-1)/2));
+end% Time domain plots
+figure;
+subplot(4,2,1);
+plot(t, rect_win);
+title('Rectangular Window (Time Domain)');
+xlabel('Time (s)');
+ylabel('Amplitude');
+subplot(4,2,3);
+plot(t, hamming_win);
+title('Hamming Window (Time Domain)');
+xlabel('Time (s)');
+ylabel('Amplitude');
+subplot(4,2,5);
+plot(t, hanning_win);
+title('Hanning Window (Time Domain)');
+xlabel('Time (s)');
+ylabel('Amplitude');
+subplot(4,2,7);
+plot(t, bartlett_win);
+title('Bartlett Window (Time Domain)');
+xlabel('Time (s)');
+ylabel('Amplitude');% Frequency domain analysis
+nfft = 1024; % Number of FFT points
+f = (-nfft/2:nfft/2-1) / nfft * fs;
+rect_freq = fftshift(abs(fft(rect_win, nfft)));
+hamming_freq = fftshift(abs(fft(hamming_win, nfft)));
+hanning_freq = fftshift(abs(fft(hanning_win, nfft)));
+bartlett_freq = fftshift(abs(fft(bartlett_win, nfft)));% Normalize frequency responses
+rect_freq = rect_freq / max(rect_freq);
+hamming_freq = hamming_freq / max(hamming_freq);
+hanning_freq = hanning_freq / max(hanning_freq);
+bartlett_freq = bartlett_freq / max(bartlett_freq);% Frequency domain plots
+subplot(4,2,2);
+plot(f, 20*log10(rect_freq));
+title('Rectangular Window (Frequency Domain)');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude (dB)');
+ylim([-80 5]);
+subplot(4,2,4);
+plot(f, 20*log10(hamming_freq));
+title('Hamming Window (Frequency Domain)');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude (dB)');
+ylim([-80 5]);
+subplot(4,2,6);
+plot(f, 20*log10(hanning_freq));
+title('Hanning Window (Frequency Domain)');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude (dB)');
+ylim([-80 5]);
+subplot(4,2,8);
+plot(f, 20*log10(bartlett_freq));
+title('Bartlett Window (Frequency Domain)');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude (dB)');ylim([-80 5]);% Adjust layout for better visualization
+sgtitle('Time and Frequency Domain Responses of Fixed Windows-102395005');
